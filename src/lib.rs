@@ -94,7 +94,7 @@ impl ox_game_impl for ttt_sys::ox_game {
 }
 
 /*****************************************************************/
-pub fn seed_from_entropy() -> ttt_sys::URND32 {
+pub fn seed_from_entropy() -> c_uint {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
