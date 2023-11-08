@@ -3,7 +3,7 @@
 
 extern crate ttt_sys;
 
-use std::os::raw::c_uint;
+use std::os::raw::{c_uint, c_void};
 
 use std::mem::MaybeUninit;
 
@@ -18,7 +18,29 @@ impl Builder {
         }
     }
 
-    pub fn build(self) -> ttt_sys::ox_game {
+    pub fn build(
+        mut self,
+        winlist: &[[c_uint; 3usize]; 8usize],
+        trilist: &[[c_uint; 3usize]; 48usize],
+    ) -> ttt_sys::ox_game {
+        let self_game = unsafe { self.game.assume_init_mut() };
+
+        unsafe {
+            ttt_sys::ox_genpow2a(
+                self_game.win.as_mut_ptr(),
+                winlist.as_ptr() as *const c_void,
+                self_game.nwin,
+                self_game.nelement,
+            );
+
+            ttt_sys::ox_genpow2a(
+                self_game.tri.as_mut_ptr(),
+                trilist.as_ptr() as *const c_void,
+                self_game.ntri,
+                self_game.ntrielement,
+            );
+        }
+
         unsafe { self.game.assume_init() }
     }
 }
@@ -40,38 +62,12 @@ pub struct Builder_random {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_random {
-    pub fn set_random(mut self, seed: c_uint) -> Builder_win {
+    pub fn set_random(mut self, seed: c_uint) -> Builder_nwin {
         let self_game = unsafe { self.game.assume_init_mut() };
 
         unsafe {
             ttt_sys::glibcrnginit(self_game.random.as_mut_ptr() as *mut ttt_sys::RND32, seed);
         }
-
-        Builder_win { game: self.game }
-    }
-}
-
-pub struct Builder_win {
-    game: MaybeUninit<ttt_sys::ox_game>,
-}
-impl Builder_win {
-    pub fn set_win(mut self, win: &[::std::os::raw::c_uint; 8usize]) -> Builder_tri {
-        let self_game = unsafe { self.game.assume_init_mut() };
-
-        self_game.win = *win;
-
-        Builder_tri { game: self.game }
-    }
-}
-
-pub struct Builder_tri {
-    game: MaybeUninit<ttt_sys::ox_game>,
-}
-impl Builder_tri {
-    pub fn set_tri(mut self, tri: &[::std::os::raw::c_uint; 48usize]) -> Builder_nwin {
-        let self_game = unsafe { self.game.assume_init_mut() };
-
-        self_game.tri = *tri;
 
         Builder_nwin { game: self.game }
     }

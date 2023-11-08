@@ -27,9 +27,27 @@ pub fn seed_from_entropy() -> c_uint {
         .as_millis() as c_uint
 }
 
+pub fn build_game() -> ttt_sys::ox_game {
+    use prelude::{builder::Builder, cons};
+
+    Builder::new()
+        .set_id(0)
+        .set_random(seed_from_entropy())
+        .set_nwin(ttt_sys::NWIN)
+        .set_ntri(ttt_sys::NTRI)
+        .set_nelement(ttt_sys::NELEMENT)
+        .set_ntrielement(ttt_sys::NTRIELEMENT)
+        .build(&cons::WINLIST, &cons::TRILIST)
+}
+
+pub fn build_players() -> Vec<ttt_sys::ox_player> {
+    vec![ttt_sys::ox_player::new(0), ttt_sys::ox_player::new(1)]
+}
+
 pub mod prelude {
     pub extern crate ttt_sys;
     pub mod builder;
+    pub mod cons;
     pub use crate::ox_game_impl;
     pub use crate::ox_player_impl;
 }
