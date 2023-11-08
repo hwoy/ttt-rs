@@ -18,29 +18,7 @@ impl Builder {
         }
     }
 
-    pub fn build(
-        mut self,
-        winlist: &[[c_uint; 3usize]; 8usize],
-        trilist: &[[c_uint; 3usize]; 48usize],
-    ) -> ttt_sys::ox_game {
-        let self_game = unsafe { self.game.assume_init_mut() };
-
-        unsafe {
-            ttt_sys::ox_genpow2a(
-                self_game.win.as_mut_ptr(),
-                winlist.as_ptr() as *const c_void,
-                self_game.nwin,
-                self_game.nelement,
-            );
-
-            ttt_sys::ox_genpow2a(
-                self_game.tri.as_mut_ptr(),
-                trilist.as_ptr() as *const c_void,
-                self_game.ntri,
-                self_game.ntrielement,
-            );
-        }
-
+    pub fn build(self) -> ttt_sys::ox_game {
         unsafe { self.game.assume_init() }
     }
 }
@@ -116,10 +94,50 @@ pub struct Builder_ntrielement {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_ntrielement {
-    pub fn set_ntrielement(mut self, ntrielement: c_uint) -> Builder {
+    pub fn set_ntrielement(mut self, ntrielement: c_uint) -> Builder_win {
         let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.ntrielement = ntrielement;
+
+        Builder_win { game: self.game }
+    }
+}
+
+pub struct Builder_win {
+    game: MaybeUninit<ttt_sys::ox_game>,
+}
+impl Builder_win {
+    pub fn set_win(mut self, winlist: &[[c_uint; 3usize]; 8usize]) -> Builder_tri {
+        let self_game = unsafe { self.game.assume_init_mut() };
+
+        unsafe {
+            ttt_sys::ox_genpow2a(
+                self_game.win.as_mut_ptr(),
+                winlist.as_ptr() as *const c_void,
+                self_game.nwin,
+                self_game.nelement,
+            );
+        }
+
+        Builder_tri { game: self.game }
+    }
+}
+
+pub struct Builder_tri {
+    game: MaybeUninit<ttt_sys::ox_game>,
+}
+impl Builder_tri {
+    pub fn set_tri(mut self, trilist: &[[c_uint; 3usize]; 48usize]) -> Builder {
+        let self_game = unsafe { self.game.assume_init_mut() };
+
+        unsafe {
+            ttt_sys::ox_genpow2a(
+                self_game.tri.as_mut_ptr(),
+                trilist.as_ptr() as *const c_void,
+                self_game.ntri,
+                self_game.ntrielement,
+            );
+        }
 
         Builder { game: self.game }
     }

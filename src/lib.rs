@@ -37,7 +37,9 @@ pub fn build_game_with(id: u32, seed: u32) -> ttt_sys::ox_game {
         .set_ntri(ttt_sys::NTRI)
         .set_nelement(ttt_sys::NELEMENT)
         .set_ntrielement(ttt_sys::NTRIELEMENT)
-        .build(&cons::WINLIST, &cons::TRILIST)
+        .set_win(&cons::WINLIST)
+        .set_tri(&cons::TRILIST)
+        .build()
 }
 
 pub fn build_game() -> ttt_sys::ox_game {
