@@ -14,6 +14,7 @@ impl ox_player_impl for ttt_sys::ox_player {
     }
 }
 
+use std::mem::MaybeUninit;
 pub struct Builder {
     game: ttt_sys::ox_game,
 }
@@ -23,6 +24,18 @@ impl Builder {
         let mut s = unsafe { ttt_sys::ox_creatgame(seed) };
         s.id = id;
         Self { game: s }
+    }
+
+    pub fn set_id(mut self, id: c_uint) -> Self {
+        self.game.id = id;
+        self
+    }
+
+    pub fn set_seed(mut self, seed: c_uint) -> Self {
+        unsafe {
+            ttt_sys::glibcrnginit(self.game.random.as_mut_ptr() as *mut ttt_sys::RND32, seed);
+        }
+        self
     }
 
     pub fn set_win(mut self, win: &[::std::os::raw::c_uint; 8usize]) -> Self {
