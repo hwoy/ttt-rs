@@ -7,17 +7,13 @@ use std::os::raw::c_uint;
 
 use std::mem::MaybeUninit;
 
-pub struct Builder_Prototype {
-    game: MaybeUninit<ttt_sys::ox_game>,
-}
-
 pub struct Builder {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 
 impl Builder {
-    pub fn new_prototype() -> Builder_Prototype {
-        Builder_Prototype {
+    pub fn new() -> Builder_id {
+        Builder_id {
             game: MaybeUninit::uninit(),
         }
     }
@@ -27,108 +23,108 @@ impl Builder {
     }
 }
 
-struct Builder_id {
+pub struct Builder_id {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_id {
-    pub fn set_id(mut builder: Builder_Prototype, id: c_uint) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_id(mut self, id: c_uint) -> Builder_random {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.id = id;
 
-        Self { game: builder.game }
+        Builder_random { game: self.game }
     }
 }
 
-struct Builder_random {
+pub struct Builder_random {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_random {
-    pub fn set_random(mut builder: Builder_id, seed: c_uint) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_random(mut self, seed: c_uint) -> Builder_win {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         unsafe {
             ttt_sys::glibcrnginit(self_game.random.as_mut_ptr() as *mut ttt_sys::RND32, seed);
         }
 
-        Self { game: builder.game }
+        Builder_win { game: self.game }
     }
 }
 
-struct Builder_win {
+pub struct Builder_win {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_win {
-    pub fn set_win(mut builder: Builder_random, win: &[::std::os::raw::c_uint; 8usize]) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_win(mut self, win: &[::std::os::raw::c_uint; 8usize]) -> Builder_tri {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.win = *win;
 
-        Self { game: builder.game }
+        Builder_tri { game: self.game }
     }
 }
 
-struct Builder_tri {
+pub struct Builder_tri {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_tri {
-    pub fn set_tri(mut builder: Builder_win, tri: &[::std::os::raw::c_uint; 48usize]) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_tri(mut self, tri: &[::std::os::raw::c_uint; 48usize]) -> Builder_nwin {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.tri = *tri;
 
-        Self { game: builder.game }
+        Builder_nwin { game: self.game }
     }
 }
 
-struct Builder_nwin {
+pub struct Builder_nwin {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_nwin {
-    pub fn set_nwin(mut builder: Builder_tri, nwin: c_uint) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_nwin(mut self, nwin: c_uint) -> Builder_ntri {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.nwin = nwin;
 
-        Self { game: builder.game }
+        Builder_ntri { game: self.game }
     }
 }
 
-struct Builder_ntri {
+pub struct Builder_ntri {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_ntri {
-    pub fn set_ntri(mut builder: Builder_nwin, ntri: c_uint) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_ntri(mut self, ntri: c_uint) -> Builder_nelement {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.ntri = ntri;
 
-        Self { game: builder.game }
+        Builder_nelement { game: self.game }
     }
 }
 
-struct Builder_nelement {
+pub struct Builder_nelement {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_nelement {
-    pub fn set_nelement(mut builder: Builder_ntri, nelement: c_uint) -> Self {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_nelement(mut self, nelement: c_uint) -> Builder_ntrielement {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.nelement = nelement;
 
-        Self { game: builder.game }
+        Builder_ntrielement { game: self.game }
     }
 }
 
-struct Builder_ntrielement {
+pub struct Builder_ntrielement {
     game: MaybeUninit<ttt_sys::ox_game>,
 }
 impl Builder_ntrielement {
-    pub fn set_ntrielement(mut builder: Builder_nelement, ntrielement: c_uint) -> Builder {
-        let self_game = unsafe { builder.game.assume_init_mut() };
+    pub fn set_ntrielement(mut self, ntrielement: c_uint) -> Builder {
+        let self_game = unsafe { self.game.assume_init_mut() };
 
         self_game.ntrielement = ntrielement;
 
-        Builder { game: builder.game }
+        Builder { game: self.game }
     }
 }
