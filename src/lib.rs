@@ -3,7 +3,7 @@
 
 extern crate ttt_sys;
 
-use std::os::raw::c_uint;
+use std::os::raw::{c_int, c_uint};
 
 pub trait ox_player_impl {
     fn new(id: c_uint) -> Self;
@@ -15,11 +15,43 @@ impl ox_player_impl for ttt_sys::ox_player {
     }
 }
 
-pub trait ox_game_impl {}
+pub struct Ai {}
+impl Ai {
+    pub fn ai(
+        game: &mut ttt_sys::ox_game,
+        p1: &ttt_sys::ox_player,
+        p2: &ttt_sys::ox_player,
+    ) -> c_int {
+        unsafe { ttt_sys::ox_ai(game, p1, p2) }
+    }
+}
 
-impl ox_game_impl for ttt_sys::ox_game {}
+pub trait ox_game_impl {
+    fn gameplay(
+        &self,
+        p1: &ttt_sys::ox_player,
+        p2: &mut ttt_sys::ox_player,
+        val: c_uint,
+    ) -> ttt_sys::ox_gameid;
 
-/*****************************************************************/
+    fn iswin(&self, player: &ttt_sys::ox_player) -> c_int;
+}
+
+impl ox_game_impl for ttt_sys::ox_game {
+    fn gameplay(
+        &self,
+        p1: &ttt_sys::ox_player,
+        p2: &mut ttt_sys::ox_player,
+        val: c_uint,
+    ) -> ttt_sys::ox_gameid {
+        unsafe { ttt_sys::ox_gameplay(self, p1, p2, val) }
+    }
+
+    fn iswin(&self, player: &ttt_sys::ox_player) -> c_int {
+        unsafe { ttt_sys::ox_iswin(self, player) }
+    }
+}
+
 pub fn seed_from_entropy() -> c_uint {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
